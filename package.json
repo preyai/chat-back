@@ -54,6 +54,7 @@
     "helmet": "^4.6.0",
     "mongodb-core": "^3.2.7",
     "mongoose": "^6.1.4",
+    "node-fetch": "2",
     "serve-favicon": "^2.5.0",
     "winston": "^3.0.0"
   },
@@ -62,7 +63,9 @@
     "@types/cors": "^2.8.12",
     "@types/jest": "^27.4.1",
     "@types/jsonwebtoken": "^8.5.8",
+    "@types/node-fetch": "^2.6.1",
     "@types/serve-favicon": "^2.5.3",
+    "@types/socket.io-parser": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^5.20.0",
     "@typescript-eslint/parser": "^5.20.0",
     "axios": "^0.26.1",

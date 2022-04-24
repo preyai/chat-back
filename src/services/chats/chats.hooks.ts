@@ -1,5 +1,6 @@
 import { HooksObject } from '@feathersjs/feathers';
 import * as authentication from '@feathersjs/authentication';
+import { onCreate, protect } from '../../hooks/chats';
 // Don't remove this comment. It's needed to format import lines nicely.
 
 const { authenticate } = authentication.hooks;
@@ -9,10 +10,10 @@ export default {
     all: [ authenticate('jwt') ],
     find: [],
     get: [],
-    create: [],
-    update: [],
-    patch: [],
-    remove: []
+    create: [onCreate()],
+    update: [protect()],
+    patch: [protect()],
+    remove: [protect()]
   },
 
   after: {

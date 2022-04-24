@@ -11,7 +11,9 @@ export default function (app: Application): Model<any> {
   const { Schema } = mongooseClient;
   const schema = new Schema({
     theme: { type: String, required: true },
-    users: [{ type: Types.ObjectId, ref: 'users' }]
+    owner: { type: Types.ObjectId, ref: 'users' },
+    users: [{ type: Types.ObjectId, ref: 'users' }],
+    private: {type:Boolean, default: false}
   }, {
     timestamps: true
   });

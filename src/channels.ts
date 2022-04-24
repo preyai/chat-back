@@ -1,6 +1,7 @@
 import '@feathersjs/transport-commons';
-import { HookContext } from '@feathersjs/feathers';
+import { Paginated } from '@feathersjs/feathers';
 import { Application } from './declarations';
+
 
 export default function(app: Application): void {
   if(typeof app.channel !== 'function') {
@@ -18,7 +19,7 @@ export default function(app: Application): void {
     // real-time connection, e.g. when logging in via REST
     if(connection) {
       // Obtain the logged in user from the connection
-      // const user = connection.user;
+      const user = connection.user;
       
       // The connection is no longer anonymous, remove it
       app.channel('anonymous').leave(connection);
@@ -37,19 +38,52 @@ export default function(app: Application): void {
       // Easily organize users by email and userid for things like messaging
       // app.channel(`emails/${user.email}`).join(connection);
       // app.channel(`userIds/${user.id}`).join(connection);
+
+      // type type = typeof Chats;
+
+      // подписаться на известные чаты
+      app.service('chats').find({query:{users:user._id}})
+        .then((res)=>{
+
+          for (const chat of (res as Paginated<any>).data) {
+            app.channel(`/chat/${chat._id}`).join(connection);
+          }
+        });
+
+      // подписаться на созданный
+      app.service('chats').on('created', (chat)=> {
+        if (user._id.equals(chat.owner))
+          app.channel(`/chat/${chat._id}`).join(connection);
+      });
+
+      // подписаться при вступлении
+      app.service('chats').on('patched', (chat)=> {
+        if (chat.users.find((u:any)=>user._id.equals(u)))
+          app.channel(`/chat/${chat._id}`).join(connection);
+      });
     }
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  app.publish((data: any, hook: HookContext) => {
-    // Here you can add event publishers to channels set up in `channels.ts`
-    // To publish only for a specific event use `app.publish(eventname, () => {})`
+  // app.publish((data: any, hook: HookContext) => {
+  //   // Here you can add event publishers to channels set up in `channels.ts`
+  //   // To publish only for a specific event use `app.publish(eventname, () => {})`
 
-    console.log('Publishing all events to all authenticated users. See `channels.ts` and https://docs.feathersjs.com/api/channels.html for more information.'); // eslint-disable-line
+  //   console.log('Publishing all events to all authenticated users. See `channels.ts` and https://docs.feathersjs.com/api/channels.html for more information.'); // eslint-disable-line
 
-    // e.g. to publish all service events to all authenticated users use
-    return app.channel('authenticated');
+  //   // e.g. to publish all service events to all authenticated users use
+  //   return app.channel('authenticated');
+  // });
+
+  app.service('messages').publish((data) => {
+    
+    return [
+      app.channel(`/chat/${data.chat}`),
+    ];
   });
+
+  app.service('chats').publish(()=> app.channel('authenticated'));
+  app.service('users').publish(()=> app.channel('authenticated'));
 
   // Here you can also add service specific event publishers
   // e.g. the publish the `users` service `created` event to the `admins` channel
